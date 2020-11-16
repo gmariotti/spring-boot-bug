@@ -15,7 +15,7 @@ class SpringBootApplicationTest {
     fun `verify default endpoints are available`(endpoint: String) {
         client
             .get()
-            .uri(endpoint)
+            .uri("/actuator/$endpoint")
             .exchange()
             .expectStatus().is2xxSuccessful
     }
