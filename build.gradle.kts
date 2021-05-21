@@ -1,16 +1,19 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.10"
-    id("org.jetbrains.kotlin.plugin.spring") version "1.4.10"
+    kotlin("jvm") version "1.4.32"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.4.32"
+    id("com.google.cloud.tools.jib") version "3.0.0"
 }
 
 repositories {
     mavenCentral()
 }
 
+version = "2.4.6"
+
 dependencies {
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:2.4.0"))
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:$version"))
 
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.boot:spring-boot-starter-actuator")

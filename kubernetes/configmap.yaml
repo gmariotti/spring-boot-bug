@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spring-boot-application
+  labels:
+    app: spring-boot-application
+data:
+  application-kubernetes.yml: |
+    server.port: 8080

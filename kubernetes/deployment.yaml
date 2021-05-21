@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-boot-application
+  labels:
+    app: spring-boot-application
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-boot-application
+  template:
+    metadata:
+      labels:
+        app: spring-boot-application
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        # needed because of https://github.com/aws/amazon-eks-pod-identity-webhook/issues/8
+        fsGroup: 65534
+      containers:
+        - name: spring-boot-application
+          image: "localhost:5000/spring-boot-bug:2.4.6"
+          imagePullPolicy: Always
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:+UseContainerSupport -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=80"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 3
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 3
+            successThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: spring-boot-application
+              mountPath: /config
+              readOnly: true
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: true
+      restartPolicy: Always
+      volumes:
+        - name: tmp
+          emptyDir: { }
+        - name: spring-boot-application
+          configMap:
+            name: spring-boot-application
